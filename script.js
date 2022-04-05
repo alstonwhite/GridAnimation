@@ -1,66 +1,102 @@
+class TileNode {
+  constructor(position, adjacent=[]) {
+    this.position = position;
+    this.adjacent = adjacent;
+    this.visited = false;
+    this.htmlNode = null;
+  }
+}
+
 class TileGraph {
   constructor() {
-    this.handleClick = this.handleClick.bind(this);
-    this.findNode = this.findNode.bind(this);
-    this.cascade = this.cascade.bind(this);
-    this.process = this.process.bind(this);
-
-    this.colorStart = '#ab7f56';
-    this.colorEnd = '#8eb4c7';
+    this.tileArray = [];
+    this.colorStart = 'rgb(171, 127, 86)' // Hex: #ab7f56
+    this.colorEnd = 'rgb(142, 180, 199)' // Hex: #8eb4c7
     this.tilesCount = 10000; // get correct # based on screen size
     this.columns = 100;
     this.rows = this.tilesCount / this.columns;
     this.wrapper = document.getElementById("wrapper");
-    
-    // Populate TileGraph -- move to method
-    // Create tiles in arrays of length (# columns)
-    // Map tiles by value in hash table for quick lookup?
-    for (let i = 0; i < this.tilesCount; i++) {
-      const tile = document.createElement('div');
-      tile.classList.add('tile');
-      tile.style.backgroundColor = this.colorStart;
-      wrapper.appendChild(tile);
-    }
-    this.wrapper.addEventListener('click', this.handleClick)
-  }
-  handleClick(e) {
-    console.log("handle click")
-    const targetNode = this.findNode(e.target.value);
-    this.cascade(targetNode);
-  }
-  findNode(value) {
-    // Find the node 
-  }
-  cascade(startNode) {
-    console.log('cascade start')
-    console.log(startNode)
-    // startNode.visited = true;
-    // const queue = [startNode];
-    // while (queue.length) {
-    //   let current = queue.shift();
-    //   this.process(current);
-    //   setTimeout(() => this.process(current), 100);
-    //   current.adjacent.forEach(sibling => {
-    //     if (!sibling.visited) queue.push(subling);
-    //   })
-    // }
-  }
-  process(node) {
-    console.log(node.color);
-    tile.style.backgroundColor = this.colorEnd;
-  }
-}
 
-class TileNode {
-  constructor(color, adjacent=[]) {
-    this.color = color;
-    this.adjacent = adjacent;
+    this.populateTiles()
+    this.wrapper.addEventListener('click', this.handleClick.bind(this))
+  }
+  
+  populateTiles() {
+    for (let i = 0; i < this.rows; i++) {
+      const tileRow = []
+      for (let j = 0; j < this.columns; j++) {
+        const tile = document.createElement('div');
+        tile.classList.add('tile');
+        tile.style.backgroundColor = this.colorStart;
+        tile.setAttribute('data-key', `${i},${j}`);
+        wrapper.appendChild(tile);
+        tileRow.push(tile); 
+      }
+      this.tileArray.push(tileRow)
+    }
+  }
+  
+  handleClick(e) {
+    const targetNodePosition = this.getPositionFromNode(e.target);
+    console.log("targetNodePosition", targetNodePosition)
+    this.cascade(targetNodePosition);
+  }
+  
+  cascade(startNodePosition) {
+    console.log('cascade start');
+    console.log('startNodePosition', startNodePosition)
+    const startNode = this.tileArray[startNodePosition[0]][startNodePosition[1]]
+    console.log('startNode', startNodePosition)
+    const queue = [startNode];
+    while (queue.length) {
+      let current = queue.shift();
+      console.log('next node', current)
+      setTimeout(() => {
+        console.log("timer done")
+        this.process(current);
+        // Find neigbors and add to queue
+        let neighbors = this.findNeighbors(current)
+        console.log('neighbors found', neighbors)
+        // queue.push(...neighbors)
+        console.log(queue.length)
+      }, 100);
+
+    }
+    console.log("all done")
+  }
+  
+  process(node) {
+    console.log("processing", node);
+    console.log("background", node.style.backgroundColor);
+    console.log("unvisited", this.isUnvisited(node));
+    node.style.backgroundColor = this.colorEnd;
+  }
+
+  getPositionFromNode(node) {
+    return node.dataset.key.split(",").map(key => Number(key))
+  }
+
+  findNeighbors(node) {
+    const [row, col] = this.getPositionFromNode(node)
+    const neighbors = []
+    if (row > 0 && this.isUnvisited(this.tileArray[row-1][col])) {
+      neighbors.push(this.tileArray[row-1][col])
+    }
+    if (col > 0 && this.isUnvisited(this.tileArray[row][col-1])) {
+      neighbors.push(this.tileArray[row][col-1])
+    }
+    if (row < this.rows - 1 && this.isUnvisited(this.tileArray[row+1][col])) {
+      neighbors.push(this.tileArray[row+1][col])
+    }
+    if (col < this.columns - 1 && this.isUnvisited(this.tileArray[row][col+1])) {
+      neighbors.push(this.tileArray[row][col+1])
+    }
+    return neighbors;
+  }
+
+  isUnvisited(node) {
+    return node.style.backgroundColor === this.colorStart;
   }
 }
 
 const tileGraph = new TileGraph();
-
-// class for tile, as a graph
-// breadth first search for color changing
-
-// tiles start with random color, then fade into #8eb4c7 for site background?
