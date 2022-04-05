@@ -5,42 +5,33 @@
 }
 
 #wrapper {
-  /* maybe start at 90% x 90%, then expand with gap after animation? */
+  /* Hide overflow for after gap animation (get # of tiles right first) */
   height: 100vh;
   width: 100vw;
   display: grid;
   grid-template-columns: repeat(100, 1vw);
-  /* vary # of columns by screen width media query */
+  /* Vary # of columns by screen width media query */
   grid-template-rows: auto;
+  gap: 0;
+  transition: gap 3s cubic-bezier(.1,1,.9,.9);
 }
 
 .tile {
   height: 1vw;
   width: 1vw;
-/*   transition: all 0.1s ease-in-out; */
+  border-radius: 0;
+  transition: backgroundColor 0.1s ease-in-out;
+  transition: borderRadius 0.1s ease-in-out;
 }
 
 .tile:hover {
   border: 1px solid #e7e7e7;
-/*   transform: scale(1.2, 1.2); */
 }
 
-/* .tile::after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  transition: opacity 0.3s ease-in-out;
-}
-
-.tile:hover::after {
-  opacity: 1;
-} */
-
-/* after animation complete, transition */
-.wrapper-background {
+#wrapper.wrapper-background {
   gap: 2px;
+}
+
+#wrapper.wrapper-background * {
+  border-radius: 2px;
 }
